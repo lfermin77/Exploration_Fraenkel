@@ -1,0 +1,57 @@
+cmake_minimum_required(VERSION 2.8.3)
+project(inc_dude)
+
+find_package(catkin REQUIRED COMPONENTS
+  roscpp
+  rospy
+  std_msgs
+  tf
+  nav_msgs
+  cv_bridge
+  image_transport
+)
+
+
+find_package(CGAL REQUIRED COMPONENTS Core)
+
+
+
+catkin_package(
+#  INCLUDE_DIRS include
+#  LIBRARIES dude_ros
+#  CATKIN_DEPENDS tf
+#  DEPENDS system_lib
+)
+
+include_directories(
+  ${catkin_INCLUDE_DIRS}
+  ${PROJECT_SOURCE_DIR}/Third_Party/dude_final  
+  ${PROJECT_SOURCE_DIR}/Third_Party/dude_final/src  
+  ${PROJECT_SOURCE_DIR}/Third_Party/dude_final/mathtool
+  ${PROJECT_SOURCE_DIR}/Third_Party/dude_final/src/skeleton
+  ${PROJECT_SOURCE_DIR}/Third_Party/dude_final/src/draw
+  ${CGAL_INCLUDE_DIRS}
+  ${PROJECT_SOURCE_DIR}/include  
+)
+include(${CGAL_USE_FILE})
+
+
+
+
+
+######## inc_dude_ros
+add_executable(inc_dude src/inc_dude.cpp  include/wrapper.cpp include/inc_decomp.cpp )
+
+target_link_libraries(inc_dude
+   ${catkin_LIBRARIES}
+   ${PROJECT_SOURCE_DIR}/Third_Party/dude_final/libdude2d.so
+   ${PROJECT_SOURCE_DIR}/Third_Party/dude_final/FIST/FIST.lib
+   ${PROJECT_SOURCE_DIR}/Third_Party/dude_final/FIST/libFIST.linux64.a
+   ${CGAL_LIBRARIES} 
+   ${CGAL_3RD_PARTY_LIBRARIES}
+ )
+
+
+add_dependencies(inc_dude ${catkin_LIBRARIES} ${CGAL_LIBRARIES})
+
+
