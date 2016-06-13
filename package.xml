@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package>
-  <name>inc_dude</name>
+  <name>exp_fraenkel</name>
   <version>0.0.0</version>
-  <description>The dude_ros package</description>
+  <description>The exp_fraenkel package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag --> 
   <!-- Example:  -->

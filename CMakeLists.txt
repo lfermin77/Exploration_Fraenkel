@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(inc_dude)
+project(exp_fraenkel)
 
 find_package(catkin REQUIRED COMPONENTS
   roscpp
@@ -40,9 +40,9 @@ include(${CGAL_USE_FILE})
 
 
 ######## inc_dude_ros
-add_executable(inc_dude src/inc_dude.cpp  include/wrapper.cpp include/inc_decomp.cpp )
+add_executable(exp_fraenkel src/exp_fraenkel.cpp  include/wrapper.cpp include/inc_decomp.cpp )
 
-target_link_libraries(inc_dude
+target_link_libraries(exp_fraenkel
    ${catkin_LIBRARIES}
    ${PROJECT_SOURCE_DIR}/Third_Party/dude_final/libdude2d.so
    ${PROJECT_SOURCE_DIR}/Third_Party/dude_final/FIST/FIST.lib
@@ -52,6 +52,6 @@ target_link_libraries(inc_dude
  )
 
 
-add_dependencies(inc_dude ${catkin_LIBRARIES} ${CGAL_LIBRARIES})
+add_dependencies(exp_fraenkel ${catkin_LIBRARIES} ${CGAL_LIBRARIES})
 
 
