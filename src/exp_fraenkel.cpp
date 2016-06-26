@@ -31,7 +31,7 @@ class ROS_handler
 	Incremental_Decomposer inc_decomp;
 	Stable_graph Stable;
 
-	std::vector <double> time_vector;
+	std::vector <double> clean_time_vector, decomp_time_vector, paint_time_vector, complete_time_vector;
 	
 	public:
 		ROS_handler(const std::string& mapname, float threshold) : mapname_(mapname),  it_(n), Decomp_threshold_(threshold)
@@ -82,7 +82,8 @@ class ROS_handler
 		////////////Draw Image & publish
 			begin_process = getTime();
 
-			grad = Stable.draw_stable_contour();
+			cv::flip(black_image, black_image,0);  grad = Stable.draw_stable_contour() & ~black_image;
+//			grad = Stable.draw_stable_contour();
 
 			cv_ptr->encoding = "32FC1";
 			grad.convertTo(grad, CV_32F);
@@ -95,11 +96,15 @@ class ROS_handler
 			printf("Time: total %.0f, Classified: occ %.1f, Decomp %.1f, Draw %.1f \n", whole_time, occupancy_time, decompose_time, drawPublish_time);
 
 
-			time_vector.push_back(whole_time);
-			cout << "Time Vector size "<< time_vector.size() << endl;
-			for(int i=0; i < time_vector.size(); i++){
+			clean_time_vector.push_back(occupancy_time);
+			decomp_time_vector.push_back(decompose_time);
+			paint_time_vector.push_back(drawPublish_time);
+			complete_time_vector.push_back(whole_time);
+			
+			cout << "Time Vector size "<< clean_time_vector.size() << endl;
+			for(int i=0; i < clean_time_vector.size(); i++){
 //				cout << time_vector[i] << endl;
-				printf("%.0f \n",time_vector[i]);
+				printf("%.0f %.0f %.0f %.0f \n", paint_time_vector[i], clean_time_vector[i],  decomp_time_vector[i] , complete_time_vector[i]);
 			}
 		/////////////////////////	
 		}
@@ -131,12 +136,19 @@ class ROS_handler
 			cv::Mat open_space = Occ_Image<10;
 			black_image = Occ_Image>90 & Occ_Image<=100;		
 			cv::Mat Median_Image, out_image, temp_image ;
+			int filter_size=2;
 
+			cv::boxFilter(black_image, temp_image, -1, cv::Size(filter_size, filter_size), cv::Point(-1,-1), false, cv::BORDER_DEFAULT ); // filter open_space
+			black_image = temp_image > filter_size*filter_size/2;  // threshold in filtered
 			cv::dilate(black_image, black_image, cv::Mat(), cv::Point(-1,-1), 4, cv::BORDER_CONSTANT, cv::morphologyDefaultBorderValue() );			// inflate obstacle
 
-			int filter_size=8;
+			filter_size=10;
 			cv::boxFilter(open_space, temp_image, -1, cv::Size(filter_size, filter_size), cv::Point(-1,-1), false, cv::BORDER_DEFAULT ); // filter open_space
 			Median_Image = temp_image > filter_size*filter_size/2;  // threshold in filtered
+			Median_Image = Median_Image | open_space ;
+			//cv::medianBlur(Median_Image, Median_Image, 3);
+			cv::dilate(Median_Image, Median_Image,cv::Mat());
+
 			out_image = Median_Image & ~black_image;// Open space without obstacles
 
 			return out_image;

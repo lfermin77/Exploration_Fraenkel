@@ -22,7 +22,7 @@
 	Incremental_Decomposer::Incremental_Decomposer(){
 		Decomp_threshold_ = 2.5;
 		resolution=0.05; //default;
-		safety_distance = 1;//default
+		safety_distance = 0.5;//default
 		first_time = true;
 		current_origin_ = cv::Point2f(0,0);
 	}
@@ -52,7 +52,9 @@
 		cv::Mat stable_drawing = cv::Mat::zeros(image_cleaned.size().height, image_cleaned.size().width, CV_8UC1);
 		drawContours(stable_drawing, Stable.Region_contour, -1, 255, -1, 8);
 		
-		cv::Mat working_image = image_cleaned & ~stable_drawing;
+		cv::Mat working_image;
+		working_image = image_cleaned & ~stable_drawing;
+//		compare(image_cleaned, stable_drawing, working_image, cv::CMP_NE);
 		cv::Mat will_be_destroyed = working_image.clone();
 		
 		std::vector<std::vector<cv::Point> > Differential_contour;
