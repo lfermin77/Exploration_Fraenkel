@@ -3,6 +3,9 @@
 #include "std_msgs/String.h"
 #include "nav_msgs/GetMap.h"
 
+#include "nav_msgs/Odometry.h"
+#include <tf/transform_listener.h>
+
 //openCV
 #include <cv_bridge/cv_bridge.h>
 #include <image_transport/image_transport.h>
@@ -32,14 +35,19 @@ class ROS_handler
 	Stable_graph Stable;
 
 	std::vector <double> clean_time_vector, decomp_time_vector, paint_time_vector, complete_time_vector;
+
+	ros::Subscriber odom_sub_;
 	
 	public:
 		ROS_handler(const std::string& mapname, float threshold) : mapname_(mapname),  it_(n), Decomp_threshold_(threshold)
 		{
 			ROS_INFO("Waiting for the map");
 			map_sub_ = n.subscribe("map", 2, &ROS_handler::mapCallback, this); //mapname_ to include different name
+			odom_sub_ = n.subscribe("pose_corrected", 1, &ROS_handler::odomCallback, this);
+			
 			timer = n.createTimer(ros::Duration(0.5), &ROS_handler::metronomeCallback, this);
 			image_pub_ = it_.advertise("/image_frontier", 1);
+			
 			
 			cv_ptr.reset (new cv_bridge::CvImage);
 			cv_ptr->encoding = "mono8";
@@ -116,6 +124,22 @@ class ROS_handler
 //		  ROS_INFO("tic tac");
 		  publish_Image();
 		}
+
+
+////////////////
+		void odomCallback(const nav_msgs::Odometry& msg)
+		{
+			float x =  msg.pose.pose.position.x;
+			float y =  msg.pose.pose.position.y;
+			
+			float yaw = tf::getYaw(msg.pose.pose.orientation);
+			
+
+
+
+		}
+
+
 
 
 ////////////////////////

@@ -34,6 +34,7 @@ int main(int argc, char** argv){
     msg.header.stamp = transform.stamp_;
 	msg.pose.pose.position.x = transform.getOrigin().x();
 	msg.pose.pose.position.y = transform.getOrigin().y();
+	msg.pose.pose.position.z = transform.getOrigin().z();
 	
 	tf::Quaternion q = transform.getRotation();
 	q= q.normalized();
