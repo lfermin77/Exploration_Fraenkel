@@ -55,3 +55,18 @@ target_link_libraries(exp_fraenkel
 add_dependencies(exp_fraenkel ${catkin_LIBRARIES} ${CGAL_LIBRARIES})
 
 
+
+
+
+######## tf2pose
+add_executable(tf2pose src/tf2position.cpp )
+
+target_link_libraries(tf2pose
+   ${catkin_LIBRARIES}
+   
+ )
+
+
+
+
+
