@@ -75,10 +75,26 @@ class ROS_handler
 			float pixel_Tau = Decomp_threshold_ / map->info.resolution;				
 			cv_ptr->header = map->header;
 			cv::Point2f origin = cv::Point2f(map->info.origin.position.x, map->info.origin.position.y);
+			cv::Rect first_rect = find_image_bounding_Rect(img); 
 
-			cv::Mat black_image, image_cleaned = clean_image(img, black_image);
+			cv::Mat cropped_img;
+			img(first_rect).copyTo(cropped_img);
 
+			cv::Mat black_image, image_cleaned = clean_image2(img, black_image);
+			
 			end_process = getTime();	occupancy_time = end_process - begin_process;
+
+
+
+
+			begin_process = getTime();
+
+
+			
+			end_process = getTime();	
+			cout << "time for contour " <<  end_process - begin_process << endl;
+			
+
 
 		///////////////////////// Decompose Image
 			begin_process = getTime();
@@ -90,8 +106,25 @@ class ROS_handler
 		////////////Draw Image & publish
 			begin_process = getTime();
 
-			cv::flip(black_image, black_image,0);  grad = Stable.draw_stable_contour() & ~black_image;
-//			grad = Stable.draw_stable_contour();
+	//		cv::Mat croppedRef(Colored_Frontier, resize_rect);			
+			cv::flip(black_image, black_image,0);  cv::Mat big = Stable.draw_stable_contour() & ~black_image;
+
+			cout << "Rect "<< first_rect << endl;
+
+//			cv::Mat croppedRef(big, first_rect); cv::Mat croppedImage; croppedRef.copyTo(croppedImage);			grad = croppedImage;
+			cv::Mat cropped;
+			big(first_rect).copyTo(cropped);
+			
+			
+			cv::Size image_size = image_cleaned.size(); 
+			grad =  cv::Mat::zeros(image_size.height, image_size.width, CV_8UC1);
+			cropped.copyTo(grad(first_rect));
+
+			image_cleaned = clean_image2(img, black_image);
+
+
+			grad= image_cleaned;
+
 
 			cv_ptr->encoding = "32FC1";
 			grad.convertTo(grad, CV_32F);
@@ -157,6 +190,55 @@ class ROS_handler
 
 		cv::Mat clean_image(cv::Mat Occ_Image, cv::Mat &black_image){
 			//Occupancy Image to Free Space	
+			
+			cv::Mat valid_image = Occ_Image < 101;
+			std::vector<std::vector<cv::Point> > test_contour;
+			cv::findContours(valid_image, test_contour, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE );
+
+			cv::Rect first_rect = cv::boundingRect(test_contour[0]);
+			for(int i=1; i < test_contour.size(); i++){
+				first_rect |= cv::boundingRect(test_contour[i]);
+			}
+			cv::Mat reduced_Image;
+			valid_image(first_rect).copyTo(reduced_Image);
+			
+			
+			cv::Mat open_space = reduced_Image<10;
+			black_image = reduced_Image>90 & reduced_Image<=100;		
+			cv::Mat Median_Image, out_image, temp_image ;
+			int filter_size=2;
+
+			cv::boxFilter(black_image, temp_image, -1, cv::Size(filter_size, filter_size), cv::Point(-1,-1), false, cv::BORDER_DEFAULT ); // filter open_space
+			black_image = temp_image > filter_size*filter_size/2;  // threshold in filtered
+			cv::dilate(black_image, black_image, cv::Mat(), cv::Point(-1,-1), 4, cv::BORDER_CONSTANT, cv::morphologyDefaultBorderValue() );			// inflate obstacle
+
+			filter_size=10;
+			cv::boxFilter(open_space, temp_image, -1, cv::Size(filter_size, filter_size), cv::Point(-1,-1), false, cv::BORDER_DEFAULT ); // filter open_space
+			Median_Image = temp_image > filter_size*filter_size/2;  // threshold in filtered
+			Median_Image = Median_Image | open_space ;
+			//cv::medianBlur(Median_Image, Median_Image, 3);
+			cv::dilate(Median_Image, Median_Image,cv::Mat());
+
+			out_image = Median_Image & ~black_image;// Open space without obstacles
+
+
+
+
+			cv::Size image_size = Occ_Image.size();
+			cv::Mat image_out(image_size, CV_8UC1);
+			cv::Mat black_image_out(image_size, CV_8UC1) ; 
+
+			out_image.copyTo(image_out(first_rect));
+			
+			black_image.copyTo(black_image_out(first_rect));
+			black_image =black_image_out;
+
+			return image_out;
+		}
+
+
+		cv::Mat clean_image2(cv::Mat Occ_Image, cv::Mat &black_image){
+			//Occupancy Image to Free Space	
 			cv::Mat open_space = Occ_Image<10;
 			black_image = Occ_Image>90 & Occ_Image<=100;		
 			cv::Mat Median_Image, out_image, temp_image ;
@@ -178,6 +260,18 @@ class ROS_handler
 			return out_image;
 		}
 
+		cv::Rect find_image_bounding_Rect(cv::Mat Occ_Image){
+			cv::Mat valid_image = Occ_Image < 101;
+			std::vector<std::vector<cv::Point> > test_contour;
+			cv::findContours(valid_image, test_contour, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE );
+
+			cv::Rect first_rect = cv::boundingRect(test_contour[0]);
+			for(int i=1; i < test_contour.size(); i++){
+				first_rect |= cv::boundingRect(test_contour[i]);
+			}
+			return first_rect;
+		}
+			
 
 };
 

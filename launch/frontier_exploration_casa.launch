@@ -13,7 +13,8 @@
 
 
 
-
+	<node pkg="exp_fraenkel" type="tf2pose" name="pose_converter" >
+	</node>
 
 
 

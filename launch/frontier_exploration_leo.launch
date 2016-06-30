@@ -13,18 +13,15 @@
 	</node>
 
 
-	<node pkg="occupancy2voronoi" type="occupancy2voronoi" name="voronoi" >
-		<remap from="image_out" to="image_voronoi"/>
-	</node>
 
-	<node pkg="occupancy2voronoi" type="tf2position" name="pose_converter" >
+	<node pkg="exp_fraenkel" type="tf2pose" name="pose_converter" >
 	</node>
 
 
 
 
 
-
+         
 	<node pkg="move_base" type="move_base" name="navigation" output="screen" >
 		<param name="base_global_planner" type="string" value="navfn/NavfnROS"/>	
 		<param name="navfn/default_tolerance" type="double" value="0.5"/>	
@@ -45,16 +42,10 @@
 	<node pkg="rviz" type="rviz" name="visualizer" >
 	</node>
 
-	<node pkg="image_view" type="image_view" name="voronoi_viewer" >
-	<remap from="image" to="image_voronoi"/>
-	</node>
 
 	<node pkg="image_view" type="image_view" name="frontier_viewer" >
 	<remap from="image" to="image_frontier"/>
 	</node>
 
-	<node pkg="image_view" type="image_view" name="image_prueba" >
-	<remap from="image" to="image_out"/>
-	</node>
 
 </launch>
