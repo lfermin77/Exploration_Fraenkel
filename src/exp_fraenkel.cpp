@@ -75,24 +75,22 @@ class ROS_handler
 			float pixel_Tau = Decomp_threshold_ / map->info.resolution;				
 			cv_ptr->header = map->header;
 			cv::Point2f origin = cv::Point2f(map->info.origin.position.x, map->info.origin.position.y);
+
+			
 			cv::Rect first_rect = find_image_bounding_Rect(img); 
-
 			cv::Mat cropped_img;
-			img(first_rect).copyTo(cropped_img);
+			img(first_rect).copyTo(cropped_img); /////////// Cut the relevant image
 
-			cv::Mat black_image, image_cleaned = clean_image2(img, black_image);
+			cv::Mat black_image2, image_cleaned2 = clean_image2(cropped_img, black_image2);
+			
+			cv::Mat image_cleaned = cv::Mat::zeros(img.size(), CV_8UC1);
+			cv::Mat black_image   = cv::Mat::zeros(img.size(), CV_8UC1);
+			
+			image_cleaned2.copyTo(image_cleaned (first_rect));
+			black_image2.copyTo(black_image (first_rect));
 			
 			end_process = getTime();	occupancy_time = end_process - begin_process;
 
-
-
-
-			begin_process = getTime();
-
-
-			
-			end_process = getTime();	
-			cout << "time for contour " <<  end_process - begin_process << endl;
 			
 
 
@@ -111,20 +109,9 @@ class ROS_handler
 
 			cout << "Rect "<< first_rect << endl;
 
-//			cv::Mat croppedRef(big, first_rect); cv::Mat croppedImage; croppedRef.copyTo(croppedImage);			grad = croppedImage;
-			cv::Mat cropped;
-			big(first_rect).copyTo(cropped);
+			big(first_rect).copyTo(grad);
 			
-			
-			cv::Size image_size = image_cleaned.size(); 
-			grad =  cv::Mat::zeros(image_size.height, image_size.width, CV_8UC1);
-			cropped.copyTo(grad(first_rect));
-
-			image_cleaned = clean_image2(img, black_image);
-
-
-			grad= image_cleaned;
-
+		
 
 			cv_ptr->encoding = "32FC1";
 			grad.convertTo(grad, CV_32F);
