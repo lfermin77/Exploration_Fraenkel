@@ -14,6 +14,7 @@ find_package(catkin REQUIRED COMPONENTS
 
 find_package(CGAL REQUIRED COMPONENTS Core)
 
+find_package(MPFR)
 
 
 catkin_package(
@@ -49,6 +50,7 @@ target_link_libraries(exp_fraenkel
    ${PROJECT_SOURCE_DIR}/Third_Party/dude_final/FIST/libFIST.linux64.a
    ${CGAL_LIBRARIES} 
    ${CGAL_3RD_PARTY_LIBRARIES}
+   ${MPFR_LIBRARIES}
  )
 
 
