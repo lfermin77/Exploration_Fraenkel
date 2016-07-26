@@ -62,6 +62,8 @@
 
 			
 		// multiple contours
+		cout << "multiple contours "<<endl;
+		
 		int gap = safety_distance / resolution;
 		
 		vector<vector<cv::Point> > big_contours_vector;
@@ -75,6 +77,7 @@
 		else resize_rect= previous_rect;
 
 		// Match between old and new
+		cout << "Match between old and new "<<endl;
 		vector<vector<cv::Point> > connected_contours, unconnected_contours;
 		std::vector<cv::Point> unconnected_centroids, connected_centroids;
 		vector< vector <int > > conection_prev_new;
@@ -115,6 +118,7 @@
 
 		
 		//Draw image with expanded contours matched
+		cout << "Draw image with expanded contours matched "<<endl;
 		cv::Mat expanded_drawing = cv::Mat::zeros(image_cleaned.size().height, image_cleaned.size().width, CV_8UC1);
 		drawContours(expanded_drawing, connected_contours,  -1, 2, -1, 8);
 
@@ -139,6 +143,7 @@
 
 
 		// Decompose in several wrappers
+		cout << "Decompose in several wrappers "<<endl;
 		begin_process = clock();
 
 		vector<DuDe_OpenCV_wrapper> wrapper_vector(Expanded_contour.size());
@@ -149,7 +154,6 @@
 			image_cleaned.copyTo(temporal_image_cut,Temporal_Image);
 			
 			wrapper_vector[i].set_pixel_Tau(pixel_Tau);			
-			
 			resize_rect |= wrapper_vector[i].Decomposer(temporal_image_cut);
 		}	
 
@@ -157,6 +161,7 @@
 
 
 	// Paint differential contours
+		cout << "Paint differential contours "<<endl;
 		vector<vector<cv::Point> > joint_contours = unconnected_contours;
 		vector<cv::Point> joint_centroids = unconnected_centroids;
 		
@@ -215,8 +220,10 @@
 			}
 
 			number_of_ones = closer_point.size();
-			centroid.x = acum.x/number_of_ones;
-			centroid.y = acum.y/number_of_ones;
+			if(number_of_ones>0){
+				centroid.x = acum.x/number_of_ones;
+				centroid.y = acum.y/number_of_ones;
+			}
 		}
 		
 		void Incremental_Decomposer::adjust_stable_contours(){

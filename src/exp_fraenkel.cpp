@@ -78,6 +78,10 @@ class ROS_handler
 
 			
 			cv::Rect first_rect = find_image_bounding_Rect(img); 
+			float rect_area = (first_rect.height)*(first_rect.width);
+			float img_area = (img.rows) * (img.cols);
+			cout <<"Area Ratio " <<  ( rect_area/img_area  )*100 <<"% "<< endl;
+			
 			cv::Mat cropped_img;
 			img(first_rect).copyTo(cropped_img); /////////// Cut the relevant image
 
@@ -91,7 +95,7 @@ class ROS_handler
 			
 			end_process = getTime();	occupancy_time = end_process - begin_process;
 
-			
+//*			
 
 
 		///////////////////////// Decompose Image
@@ -111,7 +115,9 @@ class ROS_handler
 
 			big(first_rect).copyTo(grad);
 			
-		
+			//*/
+			
+			grad=Stable.draw_stable_contour();
 
 			cv_ptr->encoding = "32FC1";
 			grad.convertTo(grad, CV_32F);
