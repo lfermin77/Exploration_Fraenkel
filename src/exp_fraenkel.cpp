@@ -101,7 +101,11 @@ class ROS_handler
 		///////////////////////// Decompose Image
 			begin_process = getTime();
 			
-			Stable = inc_decomp.decompose_image(image_cleaned, pixel_Tau, origin, map->info.resolution);
+		    try{
+				Stable = inc_decomp.decompose_image(image_cleaned, pixel_Tau, origin, map->info.resolution);
+			}
+			catch (...)  {			}
+
 			
 			end_process = getTime();	decompose_time = end_process - begin_process;
 			

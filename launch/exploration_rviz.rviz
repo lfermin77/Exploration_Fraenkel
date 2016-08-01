@@ -5,11 +5,7 @@ Panels:
     Property Tree Widget:
       Expanded:
         - /Global Options1
-        - /Local Costmap1/Status1
         - /TF1/Tree1
-        - /TF1/Tree1/odom1
-        - /TF1/Tree1/odom1/base_footprint1
-        - /TF1/Tree1/odom1/base_footprint1/base_link1
       Splitter Ratio: 0.494186
     Tree Height: 510
   - Class: rviz/Selection
@@ -163,6 +159,8 @@ Visualization Manager:
           Value: true
         base_link:
           Value: true
+        map:
+          Value: true
         odom:
           Value: true
       Marker Scale: 1
@@ -171,11 +169,12 @@ Visualization Manager:
       Show Axes: true
       Show Names: true
       Tree:
-        odom:
-          base_footprint:
-            base_link:
-              base_laser_link:
-                {}
+        map:
+          odom:
+            base_footprint:
+              base_link:
+                base_laser_link:
+                  {}
       Update Interval: 0
       Value: true
     - Alpha: 0.7
@@ -220,7 +219,7 @@ Visualization Manager:
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
-    Fixed Frame: odom
+    Fixed Frame: map
     Frame Rate: 30
   Name: root
   Tools:
@@ -241,23 +240,40 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/ThirdPersonFollower
-      Distance: 8.15582
+      Distance: 45.1713
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.06
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 0
-        Y: 0
+        X: 2.11597
+        Y: -12.4984
         Z: 0
       Name: Current View
       Near Clip Distance: 0.01
-      Pitch: 0.710398
-      Target Frame: base_link
+      Pitch: 1.5548
+      Target Frame: map
       Value: ThirdPersonFollower (rviz)
-      Yaw: 2.8204
-    Saved: ~
+      Yaw: 4.73541
+    Saved:
+      - Class: rviz/ThirdPersonFollower
+        Distance: 45.1713
+        Enable Stereo Rendering:
+          Stereo Eye Separation: 0.06
+          Stereo Focal Distance: 1
+          Swap Stereo Eyes: false
+          Value: false
+        Focal Point:
+          X: 2.11597
+          Y: -12.4984
+          Z: 0
+        Name: ThirdPersonFollower
+        Near Clip Distance: 0.01
+        Pitch: 1.5548
+        Target Frame: map
+        Value: ThirdPersonFollower (rviz)
+        Yaw: 4.73541
 Window Geometry:
   Displays:
     collapsed: false
@@ -275,4 +291,4 @@ Window Geometry:
     collapsed: false
   Width: 1276
   X: 55
-  Y: 24
+  Y: 14
