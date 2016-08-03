@@ -1,0 +1,23 @@
+<launch>
+  <master auto="start"/>
+  <param name="/use_sim_time" value="true"/>
+  <include file="$(find navigation_stage)/move_base_config/move_base.xml"/>
+  <node pkg="stage_ros" type="stageros" name="stageros" args="$(find exp_fraenkel)/worlds/cave.world" respawn="false" >
+    <param name="base_watchdog_timeout" value="0.2"/>
+  </node>
+  
+  <node pkg="cg_mrslam" type="real_mrslam" name="graph_slam" args="-idRobot 0 -nRobots 1 -scanTopic base_scan -o testmrslam.g2o -fixedFrame map"  >
+  </node>
+  
+  <node pkg="g2o2ros" type="g2o2ros_node" name="g2o2ros_node" args="robot-0-testmrslam.g2o" >
+  </node>
+
+  <node pkg="exp_fraenkel" type="exp_fraenkel" name="exp_fraenkel_node"  >
+  </node>
+  
+  <node pkg="image_view" type="image_view" name="decomposition_viewer"  >
+	<remap from="image" to="image_frontier"/>
+  </node>
+  
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find exp_fraenkel)/launch/exploration_rviz.rviz" />
+</launch>
