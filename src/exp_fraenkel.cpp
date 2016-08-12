@@ -123,8 +123,8 @@ class ROS_handler
 			
 			grad=Stable.draw_stable_contour();
 
-			cv_ptr->encoding = "32FC1";
-			grad.convertTo(grad, CV_32F);
+			cv_ptr->encoding = sensor_msgs::image_encodings::TYPE_32FC1;			grad.convertTo(grad, CV_32F);
+//			cv_ptr->encoding = sensor_msgs::image_encodings::TYPE_8UC1;			grad.convertTo(grad, CV_8UC1);
 			grad.copyTo(cv_ptr->image);////most important
 			
 			end_process = getTime();	drawPublish_time = end_process - begin_process;
