@@ -5,6 +5,7 @@
 
 #include "nav_msgs/Odometry.h"
 #include <tf/transform_listener.h>
+#include "visualization_msgs/Marker.h"
 
 //openCV
 #include <cv_bridge/cv_bridge.h>
@@ -28,6 +29,7 @@ class ROS_handler
 		
 	std::string mapname_;
 	ros::Subscriber map_sub_;	
+	ros::Subscriber graph_sub_;	
 	ros::Timer timer;
 			
 	float Decomp_threshold_;
@@ -38,12 +40,16 @@ class ROS_handler
 
 	ros::Subscriber odom_sub_;
 	
+	std::vector<geometry_msgs::Point> edges;
+	
 	public:
 		ROS_handler(const std::string& mapname, float threshold) : mapname_(mapname),  it_(n), Decomp_threshold_(threshold)
 		{
 			ROS_INFO("Waiting for the map");
 			map_sub_ = n.subscribe("map", 2, &ROS_handler::mapCallback, this); //mapname_ to include different name
 			odom_sub_ = n.subscribe("pose_corrected", 1, &ROS_handler::odomCallback, this);
+			
+			graph_sub_ = n.subscribe("SLAM_Graph", 10, &ROS_handler::graphCallback, this);
 			
 			timer = n.createTimer(ros::Duration(0.5), &ROS_handler::metronomeCallback, this);
 			image_pub_ = it_.advertise("/image_frontier", 1);
@@ -140,10 +146,15 @@ class ROS_handler
 			complete_time_vector.push_back(whole_time);
 			
 			cout << "Time Vector size "<< clean_time_vector.size() << endl;
+			
+
+			cout << "Edges received "<< edges.size() << endl;
+/*
 			for(int i=0; i < clean_time_vector.size(); i++){
 //				cout << time_vector[i] << endl;
 				printf("%.0f %.0f %.0f %.0f \n", paint_time_vector[i], clean_time_vector[i],  decomp_time_vector[i] , complete_time_vector[i]);
 			}
+			//*/
 		/////////////////////////	
 		}
 			
@@ -167,6 +178,12 @@ class ROS_handler
 
 
 
+		}
+
+////////////////
+		void graphCallback(const visualization_msgs::Marker& graph_msg)
+		{
+			edges = graph_msg.points;
 		}
 
 
