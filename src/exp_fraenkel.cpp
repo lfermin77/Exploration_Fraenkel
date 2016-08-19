@@ -14,57 +14,9 @@
 
 //DuDe
 #include "inc_decomp.hpp"
+#include "graph.hpp"
 
 
-
-class SLAM_node{
-	public:
-	float distance;
-	std::complex<double> position;
-	vector<int> edges;
-
-};
-
-class SLAM_edge{
-	public:
-	SLAM_node* from;
-	SLAM_node* to;
-	void * pepe;
-};
-	
-class UtilityGraph{
-	std::vector<SLAM_node> Nodes;
-	std::vector<SLAM_edge> Edges;
-	
-	public:
-	
-	int find_point_in_node(geometry_msgs::Point node_position){
-		int index=-1;
-		std::complex<double> query_position(node_position.x, node_position.y);
-
-		for (int i=0; i < Nodes.size();i++){
-			float distance = std::norm( Nodes[i].position - query_position) ;
-			if(distance==0){
-				index=i;
-			}
-		}
-		
-		return index;
-	}
-	
-	void build_graph_from_edges(std::vector<geometry_msgs::Point> edge_markers){
-		
-		for (int i=0; i < edge_markers.size();i+=2){
-			int index_from = find_point_in_node ( edge_markers[i] );
-			int index_to   = find_point_in_node ( edge_markers[i+1] );
-
-		}		
-		
-		
-		
-	}
-	
-};
 
 
 
@@ -199,6 +151,7 @@ class ROS_handler
 			
 
 			cout << "Edges received "<< edges.size() << endl;
+			UtilityGraph pepe;
 /*
 			for(int i=0; i < clean_time_vector.size(); i++){
 //				cout << time_vector[i] << endl;
