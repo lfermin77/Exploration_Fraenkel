@@ -6,6 +6,8 @@
 #include "nav_msgs/Odometry.h"
 #include <tf/transform_listener.h>
 #include "visualization_msgs/Marker.h"
+#include "geometry_msgs/PoseArray.h"
+
 
 //openCV
 #include <cv_bridge/cv_bridge.h>
@@ -40,16 +42,18 @@ class ROS_handler
 
 	std::vector <double> clean_time_vector, decomp_time_vector, paint_time_vector, complete_time_vector;
 
-	ros::Subscriber odom_sub_;
+	ros::Subscriber trajectory_sub_;
 	
 	std::vector<geometry_msgs::Point> edges;
+	
+	geometry_msgs::Point Last_node;
 	
 	public:
 		ROS_handler(const std::string& mapname, float threshold) : mapname_(mapname),  it_(n), Decomp_threshold_(threshold)
 		{
 			ROS_INFO("Waiting for the map");
 			map_sub_ = n.subscribe("map", 2, &ROS_handler::mapCallback, this); //mapname_ to include different name
-			odom_sub_ = n.subscribe("pose_corrected", 1, &ROS_handler::odomCallback, this);
+			trajectory_sub_ = n.subscribe("trajectory", 1, &ROS_handler::trajectoryCallback, this);
 			
 			graph_sub_ = n.subscribe("SLAM_Graph", 10, &ROS_handler::graphCallback, this);
 			
@@ -175,16 +179,13 @@ class ROS_handler
 
 
 ////////////////
-		void odomCallback(const nav_msgs::Odometry& msg)
+		void trajectoryCallback(const geometry_msgs::PoseArray &msg)
 		{
-			float x =  msg.pose.pose.position.x;
-			float y =  msg.pose.pose.position.y;
-			
-			float yaw = tf::getYaw(msg.pose.pose.orientation);
-			
 
-
-
+			for(int i=0; i< msg.poses.size();i++){
+				std::cout << "Pose is "<< msg.poses[i].position.x  <<std::endl;
+			}
+			Last_node = msg.poses.front().position;
 		}
 
 ////////////////

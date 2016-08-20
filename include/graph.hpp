@@ -12,8 +12,8 @@ class node_info{
 	std::complex<double> position;
 	
 	node_info();
-
 };
+
 //////////////////////////
 class edge_info{
 	public:
