@@ -153,13 +153,32 @@ class ROS_handler
 			
 			cout << "Time Vector size "<< clean_time_vector.size() << endl;
 			
+			
+			
+			
+			
+			
 			begin_process = getTime();
 			cout << "Edges received "<< edges.size() << endl;
 			UtilityGraph GraphSLAM;
 			GraphSLAM.build_graph_from_edges(edges);
+			if(edges.size() > 0){
+				GraphSLAM.update_distances(Last_node);
+				GraphSLAM.print_nodes();
+			}
+			
+//			cout << "Label of closest node "<< GraphSLAM.update_distances(Last_node) << endl;
+			
+
+
 //			GraphSLAM.print_nodes();
 			end_process = getTime();	drawPublish_time = end_process - begin_process;			
 			printf("Time for edges:  %.3f \n", drawPublish_time);
+
+
+
+
+
 /*
 			for(int i=0; i < clean_time_vector.size(); i++){
 //				cout << time_vector[i] << endl;
@@ -181,10 +200,10 @@ class ROS_handler
 ////////////////
 		void trajectoryCallback(const geometry_msgs::PoseArray &msg)
 		{
-
+			/*
 			for(int i=0; i< msg.poses.size();i++){
 				std::cout << "Pose is "<< msg.poses[i].position.x  <<std::endl;
-			}
+			}//*/
 			Last_node = msg.poses.front().position;
 		}
 
