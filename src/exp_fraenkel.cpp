@@ -149,9 +149,13 @@ class ROS_handler
 			
 			cout << "Time Vector size "<< clean_time_vector.size() << endl;
 			
-
+			begin_process = getTime();
 			cout << "Edges received "<< edges.size() << endl;
-			UtilityGraph pepe;
+			UtilityGraph GraphSLAM;
+			GraphSLAM.build_graph_from_edges(edges);
+//			GraphSLAM.print_nodes();
+			end_process = getTime();	drawPublish_time = end_process - begin_process;			
+			printf("Time for edges:  %.3f \n", drawPublish_time);
 /*
 			for(int i=0; i < clean_time_vector.size(); i++){
 //				cout << time_vector[i] << endl;

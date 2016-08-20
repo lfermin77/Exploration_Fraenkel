@@ -41,7 +41,7 @@ include(${CGAL_USE_FILE})
 
 
 ######## inc_dude_ros
-add_executable(exp_fraenkel src/exp_fraenkel.cpp  include/wrapper.cpp include/inc_decomp.cpp )
+add_executable(exp_fraenkel src/exp_fraenkel.cpp  include/wrapper.cpp include/inc_decomp.cpp include/graph.cpp )
 
 target_link_libraries(exp_fraenkel
    ${catkin_LIBRARIES}
