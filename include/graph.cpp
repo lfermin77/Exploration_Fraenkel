@@ -129,18 +129,7 @@ void UtilityGraph::build_graph_from_edges(std::vector<geometry_msgs::Point> edge
 }
 
 
-Node_iter UtilityGraph::find_min_cost(std::list <Node*> Node_List){
-	float min_distance = std::numeric_limits<float>::infinity();
-	Node_iter Min_Iter = Node_List.begin();
 
-	for(Node_iter it = Node_List.begin(); it != Node_List.end(); it++){
-		if( ((*it)->info.distance_from_origin ) < min_distance ){
-			Min_Iter = it;
-			min_distance = (*it)->info.distance_from_origin;
-	std::cout << "Minimun distace found, currently is  " << (*it)->info.label << std::endl;		}
-	}
-	return Min_Iter;
-}
 
 int UtilityGraph::update_distances(geometry_msgs::Point current_pos){
 	
@@ -161,11 +150,7 @@ int UtilityGraph::update_distances(geometry_msgs::Point current_pos){
 	
 	std::cout << "Minimun distace found, is  " << Minimal_Node->info.label << std::endl;
 
-	int counter=0;
 	while(Unvisited_Nodes.size() > 0){
-		
-//		std::cout << "Unvisited_Nodes.size() before erase "  << Unvisited_Nodes.size() << std::endl;
-		
 		Node_iter eliminate_iter = Unvisited_Nodes.begin();
 		float min_distance = std::numeric_limits<float>::infinity();
 
@@ -175,32 +160,20 @@ int UtilityGraph::update_distances(geometry_msgs::Point current_pos){
 				min_distance = (*it)->info.distance_from_origin;
 			}
 		}
+		Minimal_Node = (*eliminate_iter);
 
-//		std::cout << "Minimun distace found, currently is  " << (*eliminate_iter)->info.label << std::endl;				
 		Unvisited_Nodes.erase(eliminate_iter);
-//		std::cout << "Unvisited_Nodes.size()  after erase"  << Unvisited_Nodes.size() << std::endl;
-		
-//		std::cout << "counter  " << counter << std::endl;
-		counter++;
-//		std::cout << "Minimal_Node->connected.size()  " << Minimal_Node->connected.size() << std::endl;
 		
 		for(int i=0; i < Minimal_Node->connected.size();i++){
 			float new_distance = Minimal_Node->info.distance_from_origin  +  Minimal_Node->connected[i].linker->info.distance;
-//			std::cout << "new_distance  " << new_distance << std::endl;			
 
 			if(new_distance < Minimal_Node->connected[i].to->info.distance_from_origin  ){
 				Minimal_Node->connected[i].to->info.distance_from_origin = new_distance;
 				Minimal_Node->connected[i].to->predecesor = Minimal_Node;
 			}
 		}
-//		std::cout << "First Iter completed  "  << std::endl;
-
-	
 	}
-	
-	
 	return -1;
-
 }
 
 
