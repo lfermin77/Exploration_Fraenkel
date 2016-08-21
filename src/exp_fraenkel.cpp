@@ -130,10 +130,23 @@ class ROS_handler
 			cout << "Rect "<< first_rect << endl;
 
 			big(first_rect).copyTo(grad);
+
+//			grad=Stable.draw_stable_contour();			
+	
+	
 			
-			//*/
+			UtilityGraph GraphSLAM;
+			GraphSLAM.build_graph_from_edges(edges);
+			if(edges.size() > 0){
+				GraphSLAM.update_distances(Last_node);
+				GraphSLAM.print_nodes();
+			}
+	
+			grad = graph2image(GraphSLAM, map->info);
+			cv::flip(img,img,0);
 			
-			grad=Stable.draw_stable_contour();
+//			grad = grad & (img>75 & img<101 );			
+
 
 			cv_ptr->encoding = sensor_msgs::image_encodings::TYPE_32FC1;			grad.convertTo(grad, CV_32F);
 //			cv_ptr->encoding = sensor_msgs::image_encodings::TYPE_8UC1;			grad.convertTo(grad, CV_8UC1);
@@ -159,19 +172,7 @@ class ROS_handler
 			
 			
 			begin_process = getTime();
-			cout << "Edges received "<< edges.size() << endl;
-			UtilityGraph GraphSLAM;
-			GraphSLAM.build_graph_from_edges(edges);
-			if(edges.size() > 0){
-				GraphSLAM.update_distances(Last_node);
-				GraphSLAM.print_nodes();
-			}
-			
-//			cout << "Label of closest node "<< GraphSLAM.update_distances(Last_node) << endl;
-			
-
-
-//			GraphSLAM.print_nodes();
+//			graph_iteration();
 			end_process = getTime();	drawPublish_time = end_process - begin_process;			
 			printf("Time for edges:  %.3f \n", drawPublish_time);
 
@@ -317,6 +318,68 @@ class ROS_handler
 			int a=1;
 			std::pair<int,int> xyz;
 		}
+
+		void graph_iteration(){
+			cout << "Edges received "<< edges.size() << endl;
+			UtilityGraph GraphSLAM;
+			GraphSLAM.build_graph_from_edges(edges);
+			if(edges.size() > 0){
+				GraphSLAM.update_distances(Last_node);
+				GraphSLAM.print_nodes();
+			}
+	
+	
+	
+			
+//			cout << "Label of closest node "<< GraphSLAM.update_distances(Last_node) << endl;			
+//			GraphSLAM.print_nodes();
+		}
+
+
+		cv::Mat graph2image(UtilityGraph &GraphSLAM, nav_msgs::MapMetaData info){
+//			cv::Mat  Node_image(info.height, info.width, CV_8U);
+			cv::Mat  Node_image = cv::Mat::zeros(info.height, info.width, CV_8UC1);
+			cv::Mat  Tag_image  = cv::Mat::zeros(info.height, info.width, CV_8UC1);
+			cv::Mat  image_test  = cv::Mat::zeros(info.height, info.width, CV_8UC1);
+			
+			std::complex<double> origin(info.origin.position.x, info.origin.position.x);	
+			
+			for(int i = 0; i < Stable.Region_contour.size();i++){
+				drawContours(Tag_image, Stable.Region_contour, i, i+1, -1, 8);
+			}
+			cv::flip(Tag_image,Tag_image,0);
+
+			for(Node_iter it = GraphSLAM.Nodes.begin(); it != GraphSLAM.Nodes.end(); it++ ){
+				std::complex<double> current_node_position = (*it)->info.position;
+
+//				current_node_position = (current_node_position - origin);
+//				int x = round(current_node_position.real() / info.resolution);
+//				int y = round(current_node_position.imag() / info.resolution);
+
+				int x =               round( (current_node_position.real() - origin.real() ) / info.resolution);
+				int y = info.height - round( (current_node_position.imag() - origin.imag() ) / info.resolution);
+				
+//				std::cout << "x " << x << ", y "<< y << ", height "<<info.height<< std::endl;
+				
+//				Node_image.at<uchar>(y,x) = 1;
+//				Node_image.at<uchar>(cv::Point(x,y)) = 255;
+				Node_image.at<uchar>(cv::Point(x,y)) = 1;
+
+
+			}
+			
+			cv::dilate(Node_image, Node_image, cv::Mat(), cv::Point(-1,-1), 4, cv::BORDER_CONSTANT, cv::morphologyDefaultBorderValue() );			
+			
+
+//			Node_image = ~Node_image;
+//			image_test = Tag_image(Node_image);//.copyTo(image_test);
+			Tag_image.copyTo(image_test , ~Node_image);
+
+//			return  image_test;
+			return  Node_image;
+		}
+						
+
 
 };
 
