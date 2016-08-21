@@ -342,7 +342,7 @@ class ROS_handler
 			cv::Mat  Tag_image  = cv::Mat::zeros(info.height, info.width, CV_8UC1);
 			cv::Mat  image_test  = cv::Mat::zeros(info.height, info.width, CV_8UC1);
 			
-			std::complex<double> origin(info.origin.position.x, info.origin.position.x);	
+			std::complex<double> origin(info.origin.position.x, info.origin.position.y);	
 			
 			for(int i = 0; i < Stable.Region_contour.size();i++){
 				drawContours(Tag_image, Stable.Region_contour, i, i+1, -1, 8);
@@ -362,8 +362,8 @@ class ROS_handler
 //				std::cout << "x " << x << ", y "<< y << ", height "<<info.height<< std::endl;
 				
 //				Node_image.at<uchar>(y,x) = 1;
-//				Node_image.at<uchar>(cv::Point(x,y)) = 255;
-				Node_image.at<uchar>(cv::Point(x,y)) = 1;
+				Node_image.at<uchar>(cv::Point(x,y)) = 255;
+//				Node_image.at<uchar>(cv::Point(x,y)) = 1;
 
 
 			}
@@ -375,8 +375,8 @@ class ROS_handler
 //			image_test = Tag_image(Node_image);//.copyTo(image_test);
 			Tag_image.copyTo(image_test , ~Node_image);
 
-//			return  image_test;
-			return  Node_image;
+			return  image_test;
+//			return  Node_image;
 		}
 						
 
