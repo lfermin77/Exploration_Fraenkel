@@ -7,11 +7,14 @@
 node_info::node_info(){
 	distance_from_origin= std::numeric_limits<float>::infinity();
 	label=-1;
+	region_label=-1;
+	sub_region=-1;
 }
 /////////////////////////////
 
 edge_info::edge_info(){
 	distance = -1;
+	label=-1;
 }
 
 
@@ -23,7 +26,7 @@ Node::Node(){
 
 
 void Node::print_node_label_and_pos(){
-	std::cout << "Node "<< info.label<< std::endl;
+	std::cout << "Node "<< info.label<< ", region "<< info.region_label << std::endl;
 	for(int i=0; i < connected.size();i++){
 		std::cout << "connected to "<< (connected[i].to)->info.label<<std::endl;
 		std::cout << "connected in ("<< (connected[i].linker)->from->info.label<<","<< (connected[i].linker)->to->info.label << ")"<<std::endl;
@@ -48,8 +51,7 @@ UtilityGraph::~UtilityGraph(){
 void UtilityGraph::print_nodes(){
 	for(Node_iter it = Nodes.begin(); it != Nodes.end(); it++){
 //		(*it)->print_node_label_and_pos();
-		std::cout << "Labels "<<(*it)->info.label<< " at distance " <<  (*it)->info.distance_from_origin << std::endl;
-//			cout << "all labels "<<(*it)->info.label<<endl;
+		std::cout << "Labels "<<(*it)->info.label<< " at distance " <<  (*it)->info.distance_from_origin << ", region "<< (*it)->info.region_label <<  std::endl;
 	}
 }
 
@@ -104,6 +106,7 @@ void UtilityGraph::build_graph_from_edges(std::vector<geometry_msgs::Point> edge
 //		cout << "Insert Edges"<<endl;
 		Edge* current_edge = new Edge;
 		current_edge->info.distance = abs(FROM_position - TO_position);
+		current_edge->info.label = i;
 		
 		current_edge->from = from_Node_ptr;
 		current_edge->to   = to_Node_ptr;  
@@ -111,12 +114,12 @@ void UtilityGraph::build_graph_from_edges(std::vector<geometry_msgs::Point> edge
 		Edges.push_back(current_edge);
 	
 //		cout << "Insert Linked Information"<<endl;
-		connections connecting_from;
+		Connections connecting_from;
 		connecting_from.linker = current_edge;			
 		connecting_from.to = to_Node_ptr;
 		from_Node_ptr->connected.push_back(connecting_from);
 		
-		connections connecting_to;
+		Connections connecting_to;
 		connecting_to.linker = current_edge;			
 		connecting_to.to = from_Node_ptr;
 		to_Node_ptr->connected.push_back(connecting_to);
@@ -127,8 +130,6 @@ void UtilityGraph::build_graph_from_edges(std::vector<geometry_msgs::Point> edge
 	std::cout << "Found " << labeler  <<" nodes"<< std::endl;
 	
 }
-
-
 
 
 int UtilityGraph::update_distances(geometry_msgs::Point current_pos){
@@ -175,5 +176,90 @@ int UtilityGraph::update_distances(geometry_msgs::Point current_pos){
 	}
 	return -1;
 }
+
+
+std::list <Edge*> UtilityGraph::find_edges_between_regions(){
+	std::list <Edge*> connecting_edges;
+	std::cout << "Connecting Edges "<< std::endl;
+		
+	for(Edge_iter it = Edges.begin(); it != Edges.end(); it++){
+		int region_from = (*it)->from->info.region_label;
+		int region_to   = (*it)->to->info.region_label;
+
+			
+		if( region_from != region_to ){
+			connecting_edges.push_back((*it) );
+			std::cout <<"Edge "<< (*it)->info.label << " connect the region " << region_from  <<" with "<< region_to << std::endl;
+		}
+		
+		
+	}
+	return connecting_edges;
+}
+
+void UtilityGraph::evaluate_regions_connectivity(int number_of_regions){
+	std::vector < std::list <Node*> > Nodes_per_region;
+	Nodes_per_region.resize(number_of_regions);
+	
+	// Order Nodes per Region
+	for(Node_iter it = Nodes.begin(); it != Nodes.end(); it++){
+		int region_label = (*it)->info.region_label;
+		Nodes_per_region[region_label].push_back(*it);
+	}
+	
+	
+	for(int i=0; i<Nodes_per_region.size();i++){
+		std::cout << "Region "<< i ;
+//		evaluate_list_connectivity(Nodes_per_region[i]);
+	}
+// /*
+	for(int i=0; i< Nodes_per_region.size();i++){
+		for(Node_iter it = Nodes_per_region[i].begin(); it != Nodes_per_region[i].end(); it++){		
+			std::cout << "Node "<< (*it)->info.label <<", region "<< (*it)->info.region_label <<", sub_region"<<  (*it)->info.sub_region << std::endl;
+		}
+	}
+	//*/
+	
+}
+
+void UtilityGraph::evaluate_list_connectivity(std::list <Node*> list_in){
+
+	int name = 1;
+	list_in.front()->info.sub_region = name;
+	int terms_with_this_name=1;
+	
+	std::queue<Node*> Q;
+	Q.push( list_in.front() );
+
+	
+	while (!Q.empty()){
+		Node* current = Q.front();		Q.pop();
+
+		for (int i=0;i< current->connected.size();i++ ){
+			Node* destiny =current->connected[i].to;
+			if(destiny->info.label == current->info.label){
+				if(destiny->info.sub_region == -1 ){
+					destiny->info.sub_region = name;
+					terms_with_this_name++;
+					Q.push(destiny);
+				}
+			}
+		}
+	} 
+	
+	if(terms_with_this_name == list_in.size()){
+		std::cout << " is connected: "<< list_in.size() << " vs "<< terms_with_this_name <<std::endl;
+	}
+	else{
+		std::cout << " is disconnected: "<< list_in.size() << " vs "<< terms_with_this_name <<std::endl;
+	}
+
+
+
+
+
+}
+
+
 
 
