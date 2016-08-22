@@ -34,6 +34,8 @@ class ROS_handler
 	std::string mapname_;
 	ros::Subscriber map_sub_;	
 	ros::Subscriber graph_sub_;	
+	ros::Subscriber Uncertainty_sub_;
+    ros::Publisher  pose_array_pub_;	
 	ros::Timer timer;
 			
 	float Decomp_threshold_;
@@ -63,6 +65,10 @@ class ROS_handler
 			
 			cv_ptr.reset (new cv_bridge::CvImage);
 			cv_ptr->encoding = "mono8";
+			
+			Uncertainty_sub_ = n.subscribe("query_Uncertainty", 10, &ROS_handler::UncertaintyCallback, this);
+			pose_array_pub_  = n.advertise<geometry_msgs::PoseArray>("query_Poses", 10);
+			
 		}
 
 		~ROS_handler()	{
@@ -213,9 +219,14 @@ class ROS_handler
 		void graphCallback(const visualization_msgs::Marker& graph_msg)
 		{
 			edges = graph_msg.points;
+
 		}
 
-
+///////////////
+		void UncertaintyCallback(const geometry_msgs::PoseWithCovariance& msg)
+		{
+			int a=1;
+		}
 
 
 ////////////////////////
@@ -389,7 +400,7 @@ class ROS_handler
 int main(int argc, char **argv)
 {
 	
-	ros::init(argc, argv, "Inc_Dual_Decomposer");
+	ros::init(argc, argv, "Exploration_Fraenkel");
 	
 	std::string mapname = "map";
 	
