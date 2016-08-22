@@ -72,7 +72,7 @@ class UtilityGraph{
 
 	std::list <Edge*> find_edges_between_regions();	
 	void evaluate_regions_connectivity(int number_of_regions);
-	void evaluate_list_connectivity(std::list <Node*> list_in);
+	void evaluate_list_connectivity(std::list <Node*> list_in, int name);
 
 		
 };

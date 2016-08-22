@@ -189,7 +189,7 @@ std::list <Edge*> UtilityGraph::find_edges_between_regions(){
 			
 		if( region_from != region_to ){
 			connecting_edges.push_back((*it) );
-			std::cout <<"Edge "<< (*it)->info.label << " connect the region " << region_from  <<" with "<< region_to << std::endl;
+//			std::cout <<"Edge "<< (*it)->info.label << " connect the region " << region_from  <<" with "<< region_to << std::endl;
 		}
 		
 		
@@ -201,33 +201,61 @@ void UtilityGraph::evaluate_regions_connectivity(int number_of_regions){
 	std::vector < std::list <Node*> > Nodes_per_region;
 	Nodes_per_region.resize(number_of_regions);
 	
+	std::vector < std::vector < std::list <Node*> > >   Regions_in_Graph;
+	std::vector < std::list <Node*> >    Sub_Regions_in_Regions;
+	Regions_in_Graph.clear();
+	
 	// Order Nodes per Region
 	for(Node_iter it = Nodes.begin(); it != Nodes.end(); it++){
 		int region_label = (*it)->info.region_label;
 		Nodes_per_region[region_label].push_back(*it);
 	}
 	
-	
-	for(int i=0; i<Nodes_per_region.size();i++){
-		std::cout << "Region "<< i ;
-//		evaluate_list_connectivity(Nodes_per_region[i]);
-	}
-// /*
 	for(int i=0; i< Nodes_per_region.size();i++){
-		for(Node_iter it = Nodes_per_region[i].begin(); it != Nodes_per_region[i].end(); it++){		
-			std::cout << "Node "<< (*it)->info.label <<", region "<< (*it)->info.region_label <<", sub_region"<<  (*it)->info.sub_region << std::endl;
+		int sub_region=0;
+		std::list <Node*> Remaining_Nodes, List_of_Nodes = Nodes_per_region[i], Nodes_in_sub_Region;
+		
+		Sub_Regions_in_Regions.clear();
+		
+		while( List_of_Nodes.size() > 0){
+			evaluate_list_connectivity(List_of_Nodes, sub_region);
+			Remaining_Nodes.clear();
+			Nodes_in_sub_Region.clear();
+
+			for(Node_iter it = Nodes_per_region[i].begin(); it != Nodes_per_region[i].end(); it++){		
+				if( (*it)->info.sub_region == -1 ){
+					Remaining_Nodes.push_back(*it);
+				}
+				if( (*it)->info.sub_region == sub_region ){
+					Nodes_in_sub_Region.push_back(*it);
+				}
+			}
+			List_of_Nodes = Remaining_Nodes;
+			sub_region++;
+			Sub_Regions_in_Regions.push_back(Nodes_in_sub_Region);
+		}
+
+		Regions_in_Graph.push_back(Sub_Regions_in_Regions);
+	}
+
+	std::cout << "The graph is decomposed in " << Regions_in_Graph.size()<<" Regions" <<std::endl;
+	for(int i=0; i< Regions_in_Graph.size(); i++){
+		std::cout << " Region: " << i <<" with "<<Regions_in_Graph[i].size()<<" subregions" <<std::endl;
+		std::vector < std::list <Node*> > Subregions_Inside = Regions_in_Graph[i];
+		
+		for(int j=0; j< Subregions_Inside.size(); j++){
+			std::cout << "   Sub_Region: " << j <<" with "<< Subregions_Inside[j].size()<<" nodes"<<std::endl;
 		}
 	}
-	//*/
-	
+
 }
 
-void UtilityGraph::evaluate_list_connectivity(std::list <Node*> list_in){
+void UtilityGraph::evaluate_list_connectivity(std::list <Node*> list_in, int name){
 
-	int name = 1;
 	list_in.front()->info.sub_region = name;
-	int terms_with_this_name=1;
 	
+	int current_region_label = list_in.front()->info.region_label;
+
 	std::queue<Node*> Q;
 	Q.push( list_in.front() );
 
@@ -237,27 +265,15 @@ void UtilityGraph::evaluate_list_connectivity(std::list <Node*> list_in){
 
 		for (int i=0;i< current->connected.size();i++ ){
 			Node* destiny =current->connected[i].to;
-			if(destiny->info.label == current->info.label){
-				if(destiny->info.sub_region == -1 ){
+
+			if(destiny->info.region_label == current_region_label){
+				if(destiny->info.sub_region != name ){	
 					destiny->info.sub_region = name;
-					terms_with_this_name++;
 					Q.push(destiny);
 				}
 			}
 		}
 	} 
-	
-	if(terms_with_this_name == list_in.size()){
-		std::cout << " is connected: "<< list_in.size() << " vs "<< terms_with_this_name <<std::endl;
-	}
-	else{
-		std::cout << " is disconnected: "<< list_in.size() << " vs "<< terms_with_this_name <<std::endl;
-	}
-
-
-
-
-
 }
 
 
