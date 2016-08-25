@@ -143,7 +143,15 @@ class ROS_handler
 			GraphSLAM.build_graph_from_edges(edges);
 			if(edges.size() > 0){
 				GraphSLAM.update_distances(Last_node);
-				grad = graph2image(GraphSLAM, map->info);
+				
+				cv::Mat  Tag_image   = cv::Mat::zeros(map->info.height, map->info.width, CV_8UC1);				
+				for(int i = 0; i < Stable.Region_contour.size();i++){
+					drawContours(Tag_image, Stable.Region_contour, i, i+1, -1, 8);
+				}
+				
+				grad = graph2image(GraphSLAM, map->info, Tag_image);
+				
+				find_contour_connectivity_and_frontier(Tag_image, img);
 //				GraphSLAM.print_nodes();
 				GraphSLAM.find_edges_between_regions();
 				GraphSLAM.evaluate_regions_connectivity( Stable.Region_contour.size());
@@ -339,26 +347,16 @@ class ROS_handler
 				GraphSLAM.update_distances(Last_node);
 				GraphSLAM.print_nodes();
 			}
-	
-	
-	
-			
 //			cout << "Label of closest node "<< GraphSLAM.update_distances(Last_node) << endl;			
 //			GraphSLAM.print_nodes();
 		}
 
 
-		cv::Mat graph2image(UtilityGraph &GraphSLAM, nav_msgs::MapMetaData info){
-			cv::Mat  Node_image = cv::Mat::zeros(info.height, info.width, CV_8UC1);
-			cv::Mat  Tag_image  = cv::Mat::zeros(info.height, info.width, CV_8UC1);
+		cv::Mat graph2image(UtilityGraph &GraphSLAM, nav_msgs::MapMetaData info, cv::Mat  Tag_image ){
+			cv::Mat  Node_image  = cv::Mat::zeros(info.height, info.width, CV_8UC1);
 			cv::Mat  image_test  = cv::Mat::zeros(info.height, info.width, CV_8UC1);
 			
 			std::complex<double> origin(info.origin.position.x, info.origin.position.y);	
-			
-			for(int i = 0; i < Stable.Region_contour.size();i++){
-				drawContours(Tag_image, Stable.Region_contour, i, i+1, -1, 8);
-			}
-
 
 			for(Node_iter it = GraphSLAM.Nodes.begin(); it != GraphSLAM.Nodes.end(); it++ ){
 				std::complex<double> current_node_position = (*it)->info.position;
@@ -384,6 +382,92 @@ class ROS_handler
 			}
 		}
 						
+
+		void find_contour_connectivity_and_frontier(cv::Mat  Tag_image, cv::Mat  original_image){
+			
+			UtilityGraph Region_Graph;
+			int window_size=3;
+			
+			std::set< std::set<int> > connections_per_pixel;
+
+			cv::Mat edge;
+			cv::Canny( Tag_image, edge, 1, 1, 3);
+
+			////////////////
+			/*
+			for (int i=0;i < Stable.Region_contour.size();i++){
+				std::set<int>  connections_in_region;
+				for (int j=0;j < Stable.Region_contour[i].size();j++){				
+
+*/
+			for (int i=window_size;i < Tag_image.size().width- window_size ;i++){
+				for (int j=window_size;j < Tag_image.size().height - window_size ;j++){
+				
+					/////////////////////
+					cv::Point window_center(i,j);
+					
+					std::set<int>  connections_in_region;
+					for(int x=-window_size; x <= window_size; x++){
+						for(int y=-window_size; y <= window_size; y++){
+							cv::Point delta(x,y); 							
+//							cv::Point current_point = Stable.Region_contour[i][j] + delta;
+							cv::Point current_point = window_center + delta;
+							int tag = Tag_image.at<uchar>(current_point);
+							connections_in_region.insert( tag  );
+
+						}
+					}
+					//////////////////
+				if(connections_in_region.size()>1){
+					
+					connections_per_pixel.insert(connections_in_region);
+				}
+				}
+			}
+			//////////////	
+			
+			
+			//*
+			for (std::set < std::set<int> >::iterator it2 = connections_per_pixel.begin(); it2 != connections_per_pixel.end(); it2 ++){
+				std::cout << "Number of Connections  are "<<  it2->size() <<": ";
+//*
+				for (std::set<int>::iterator it = it2->begin(); it != it2->end(); it ++){
+					std::cout <<" " << *it;
+				}
+				//*/
+				std::cout << std::endl;
+			}
+			//*/
+				
+
+		}
+
+		void are_contours_connected(vector<cv::Point> first_contour, vector<cv::Point> second_contour, cv::Point &centroid, int &number_of_ones ){
+			
+			vector< cv::Point > closer_point;
+			cv::Point acum(0,0);
+			int threshold=2;
+			
+			for(int i=0; i<first_contour.size();i++){
+				for(int j=0; j< second_contour.size();j++){
+					float distance;
+					distance = cv::norm(first_contour[i] -  second_contour[j] );
+					if(distance < threshold){
+						cv::Point point_to_add;
+						point_to_add.x = (first_contour[i].x + second_contour[j].x)/2;
+						point_to_add.y = (first_contour[i].y + second_contour[j].y)/2;
+						
+						closer_point.push_back(point_to_add);
+						acum += point_to_add;						
+					 }					
+				}
+			}
+
+			number_of_ones = closer_point.size();
+			centroid.x = acum.x/number_of_ones;
+			centroid.y = acum.y/number_of_ones;
+		}
+
 
 
 };
