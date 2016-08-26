@@ -382,62 +382,92 @@ class ROS_handler
 			}
 		}
 						
-
+typedef std::map < std::set<int> , std::vector<cv::Point>   > edge_points_mapper;
 		void find_contour_connectivity_and_frontier(cv::Mat  Tag_image, cv::Mat  original_image){
 			
 			UtilityGraph Region_Graph;
 			int window_size=3;
 			
-			std::set< std::set<int> > connections_per_pixel;
 
-			cv::Mat edge;
-			cv::Canny( Tag_image, edge, 1, 1, 3);
-
-			////////////////
-			/*
-			for (int i=0;i < Stable.Region_contour.size();i++){
-				std::set<int>  connections_in_region;
-				for (int j=0;j < Stable.Region_contour[i].size();j++){				
-
-*/
+			edge_points_mapper mapping_set_to_point_array, mapping_frontier_to_point_array;
 			for (int i=window_size;i < Tag_image.size().width- window_size ;i++){
 				for (int j=window_size;j < Tag_image.size().height - window_size ;j++){
 				
 					/////////////////////
 					cv::Point window_center(i,j);
 					
-					std::set<int>  connections_in_region;
+					std::set<int>  connections_in_region, frontier_connections;
 					for(int x=-window_size; x <= window_size; x++){
 						for(int y=-window_size; y <= window_size; y++){
 							cv::Point delta(x,y); 							
-//							cv::Point current_point = Stable.Region_contour[i][j] + delta;
 							cv::Point current_point = window_center + delta;
 							int tag = Tag_image.at<uchar>(current_point);
-							connections_in_region.insert( tag  );
+							int frontier = original_image.at<uchar>(current_point);
+							
+							if (tag>0){
+								connections_in_region.insert( tag -1 );
+								frontier_connections.insert( tag -1 );
+							}
+							if ( frontier==255) frontier_connections.insert( -1 );
 
 						}
 					}
 					//////////////////
-				if(connections_in_region.size()>1){
-					
-					connections_per_pixel.insert(connections_in_region);
+				if(connections_in_region.size()>1){					
+					mapping_set_to_point_array[connections_in_region].push_back(window_center);
+				}
+				if(frontier_connections.size()>1 &&  ( (*frontier_connections.begin())==-1)  ){					
+					mapping_frontier_to_point_array[frontier_connections].push_back(window_center);
 				}
 				}
 			}
 			//////////////	
 			
 			
-			//*
-			for (std::set < std::set<int> >::iterator it2 = connections_per_pixel.begin(); it2 != connections_per_pixel.end(); it2 ++){
-				std::cout << "Number of Connections  are "<<  it2->size() <<": ";
 //*
-				for (std::set<int>::iterator it = it2->begin(); it != it2->end(); it ++){
+			for (edge_points_mapper::iterator it2 = mapping_set_to_point_array.begin(); it2 != mapping_set_to_point_array.end(); it2 ++){
+
+				std::cout << "Connections  are: ";
+				std::set<int> current_connections_set = it2->first ;
+				for (std::set<int>::iterator it = current_connections_set.begin(); it != current_connections_set.end(); it ++){
 					std::cout <<" " << *it;
 				}
-				//*/
+				
+				std::vector<cv::Point> current_points = it2->second;
+				cv::Point average_point(0,0);
+
+				for (std::vector<cv::Point>::iterator it = current_points.begin(); it != current_points.end(); it ++){
+					average_point += *it;
+				}		
+				std::cout <<" at position (" << average_point.x/current_points.size() << " , " << average_point.y/current_points.size() << ")";
+				
 				std::cout << std::endl;
 			}
 			//*/
+			
+//*
+			for (edge_points_mapper::iterator it2 = mapping_frontier_to_point_array.begin(); it2 != mapping_frontier_to_point_array.end(); it2 ++){
+
+				std::cout << "Frontiers  are: ";
+				std::set<int> current_connections_set = it2->first ;
+				for (std::set<int>::iterator it = current_connections_set.begin(); it != current_connections_set.end(); it ++){
+					std::cout <<" " << *it;
+				}
+				
+				std::vector<cv::Point> current_points = it2->second;
+				cv::Point average_point(0,0);
+
+				for (std::vector<cv::Point>::iterator it = current_points.begin(); it != current_points.end(); it ++){
+					average_point += *it;
+				}		
+				std::cout <<" at position (" << average_point.x/current_points.size() << " , " << average_point.y/current_points.size() << ")";
+				
+				std::cout << std::endl;
+			}
+			//*/
+
+
+
 				
 
 		}
