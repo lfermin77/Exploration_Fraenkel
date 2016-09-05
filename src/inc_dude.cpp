@@ -14,6 +14,7 @@
 
 
 
+
 class ROS_handler
 {
 	ros::NodeHandle n;
@@ -157,7 +158,7 @@ class ROS_handler
 int main(int argc, char **argv)
 {
 	
-	ros::init(argc, argv, "Inc_Dual_Decomposer");
+	ros::init(argc, argv, "Inc_Dual_Decomposer_fraenkel");
 	
 	std::string mapname = "map";
 	

@@ -14,6 +14,7 @@ find_package(catkin REQUIRED COMPONENTS
 
 find_package(CGAL REQUIRED COMPONENTS Core)
 
+find_package(MPFR)
 
 
 catkin_package(
@@ -39,7 +40,7 @@ include(${CGAL_USE_FILE})
 
 
 
-######## inc_dude_ros
+######## exp_fraenkel
 add_executable(exp_fraenkel src/exp_fraenkel.cpp  include/wrapper.cpp include/inc_decomp.cpp )
 
 target_link_libraries(exp_fraenkel
@@ -49,10 +50,12 @@ target_link_libraries(exp_fraenkel
    ${PROJECT_SOURCE_DIR}/Third_Party/dude_final/FIST/libFIST.linux64.a
    ${CGAL_LIBRARIES} 
    ${CGAL_3RD_PARTY_LIBRARIES}
+      ${MPFR_LIBRARIES}
  )
 
 
 add_dependencies(exp_fraenkel ${catkin_LIBRARIES} ${CGAL_LIBRARIES})
+
 
 
 
@@ -65,6 +68,28 @@ target_link_libraries(tf2pose
    ${catkin_LIBRARIES}
    
  )
+
+
+
+
+
+
+######## inc_DuDe_ros
+add_executable(inc_dude_fraenkel src/inc_dude.cpp  include/wrapper.cpp include/inc_decomp.cpp)
+
+target_link_libraries(inc_dude_fraenkel
+   ${catkin_LIBRARIES}
+   ${PROJECT_SOURCE_DIR}/Third_Party/dude_final/libdude2d.so
+   ${PROJECT_SOURCE_DIR}/Third_Party/dude_final/FIST/FIST.lib
+   ${PROJECT_SOURCE_DIR}/Third_Party/dude_final/FIST/libFIST.linux64.a
+   ${CGAL_LIBRARIES} 
+   ${CGAL_3RD_PARTY_LIBRARIES}
+   ${MPFR_LIBRARIES}
+ )
+
+
+add_dependencies(inc_dude_fraenkel ${catkin_LIBRARIES} ${CGAL_LIBRARIES})
+
 
 
 
