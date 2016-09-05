@@ -220,7 +220,7 @@ Visualization Manager:
       Value: true
     - Class: rviz/Image
       Enabled: true
-      Image Topic: /tagged_image
+      Image Topic: /processed_image
       Max Value: 1
       Median window: 5
       Min Value: 0
@@ -314,5 +314,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1276
-  X: -80
+  X: 51
   Y: 14
